@@ -26,3 +26,9 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 target_link_libraries(${PROJECT_NAME} glad glfw spdlog fmt::fmt)
+
+if(WIN32)
+target_compile_definitions(${PROJECT_NAME} PRIVATE WINDOWS)
+elseif(UNIX)
+target_compile_definitions(${PROJECT_NAME} PRIVATE POSIX)
+endif()
