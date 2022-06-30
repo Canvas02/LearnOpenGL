@@ -18,7 +18,7 @@ set(HEADER_FILES
     "include/callbacks.h"
     "include/file.h"
     "include/shader_util.h"
-)
+ )
 
  file(COPY "res" DESTINATION "${CMAKE_BINARY_DIR}/${PROJECT_NAME}")
 

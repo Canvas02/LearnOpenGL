@@ -1,4 +1,6 @@
 #include <array>
+#include <cstdint>
+#include <cassert>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
@@ -15,12 +17,12 @@ extern "C"
 	DLL_EXPORT int				AmdPowerXpressRequestHighPerformance = 1;
 }
 
-constexpr int WIDTH = 800, HEIGHT = 600;
+constexpr int32_t WIDTH = 800, HEIGHT = 600;
 
-constexpr std::array<float, 9> vertices_base{
-	 0.25f, -0.25f, 0.0f,
-	-0.25f, -0.25f, 0.0f,
-	 0.0f,   0.25f, 0.0f
+constexpr std::array<float_t, 9> vertices{
+	 0.5f, -0.5f, 0.0f,
+	-0.5f, -0.5f, 0.0f,
+	 0.0f,  0.5f, 0.0f
 };
 
 /*
@@ -32,22 +34,6 @@ constexpr std::array<unsigned int, 6> indices{
 
 int main()
 {
-	std::array<std::array<float, 9>, 2> vertices{};
-	
-	for (int i = 0; i < vertices_base.size(); i++)
-	{
-		if (i == 0 || i % 3 == 0)
-		{
-			vertices[0][i] = vertices_base[i] + 0.35f;
-			vertices[1][i] = vertices_base[i] - 0.35f;
-		} 
-		else
-		{
-		vertices[0][i] = vertices_base[i];
-		vertices[1][i] = vertices_base[i];
-		}
-	}
-
     if (!glfwInit())
     {
         spdlog::error("Failed to init glfw");
@@ -86,7 +72,7 @@ int main()
 	spdlog::info("Version: {}", glGetString(GL_VERSION));
 
     // Init debug
-	GLint flags = 0;
+	int32_t flags = 0;
 	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
 	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
 	{
@@ -101,57 +87,48 @@ int main()
 		puts("Debug output disabled\n\n");
 	}
 	
-	std::array<unsigned int, 2> vbo{}, vao{};
-	glGenVertexArrays(vao.size(), &vao[0]);
-	glGenBuffers(vbo.size(), &vbo[0]);
+	uint32_t vbo, vao;
+	glGenVertexArrays(1, &vao);
+	glGenBuffers(1, &vbo);
 
-	glBindVertexArray(vao[0]);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferStorage(GL_ARRAY_BUFFER, vertices[0].size() * sizeof(float), &vertices[0][0], 0);
-	//							  pointer of first element of first array ^^
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferStorage(GL_ARRAY_BUFFER, vertices.size() * sizeof(float_t), &vertices[0], 0);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(vao[1]);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferStorage(GL_ARRAY_BUFFER, vertices[1].size() * sizeof(float), &vertices[1][0], 0);
-	//							 pointer of first element of second array ^^
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 3, 0);
 	glEnableVertexAttribArray(0);
 
 	const auto vert_src = read_file("res/shaders/basic.vert.glsl");
-	const auto b_frag_src = read_file("res/shaders/blue.frag.glsl");
-	const auto y_frag_src = read_file("res/shaders/yellow.frag.glsl");
+	const auto frag_src = read_file("res/shaders/basic.frag.glsl");
+	//const auto y_frag_src = read_file("res/shaders/yellow.frag.glsl");
+	//const auto b_frag_src = read_file("res/shaders/blue.frag.glsl");
 
-	std::array<unsigned int, 2> programs{};
-	programs[0] = make_program(vert_src.c_str(), b_frag_src.c_str());
-	programs[1] = make_program(vert_src.c_str(), y_frag_src.c_str());
+	const auto program = make_program(vert_src.c_str(), frag_src.c_str());
+	glUseProgram(program);
+
+	const auto u_color = glGetUniformLocation(program, "u_color");
+	assert(u_color != -1);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(vao[0]);
-		glUseProgram(programs[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		auto time = glfwGetTime();
+		float_t green = (sin(time) / 2.0f) + 0.5f;
+		glUseProgram(program);
+		glUniform4f(u_color, 0.0f, green, 0.0f, 1.0f);
 
-		glBindVertexArray(vao[1]);
-		glUseProgram(programs[1]);
+		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
 
-	glDeleteBuffers(vbo.size(), &vbo[0]);
-	glDeleteVertexArrays(vao.size(), &vao[0]);
-	for (auto program : programs)
-	{
-		glDeleteProgram(program);
-	}
+	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(1, &vao);
+	glDeleteProgram(program);
 
 	glfwTerminate();
     return 0;

@@ -31,13 +31,14 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-void debug_msg_callback(GLenum source,
-						GLenum type,
-						GLuint id,
-						GLenum severity,
-						GLsizei length,
-						const GLchar *message,
-						const void *userParam)
+void debug_msg_callback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar *message,
+	const void *userParam)
 {
 	std::string _source;
 	std::string _type;
@@ -127,6 +128,7 @@ void debug_msg_callback(GLenum source,
 	{
 	case GL_DEBUG_SEVERITY_HIGH:
 		spdlog::error(msg);
+		assert(false);
 		break;
 	case GL_DEBUG_SEVERITY_MEDIUM:
 		spdlog::warn(msg);

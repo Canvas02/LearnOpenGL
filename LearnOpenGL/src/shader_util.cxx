@@ -1,6 +1,6 @@
 #include "shader_util.h"
 
-
+#include <cstdint>
 #include <vector>
 #include <string>
 #include <cstdio>
@@ -9,7 +9,7 @@
 
 #include "file.h"
 
-int make_shader(unsigned int shader, const char* src, unsigned int type)
+int make_shader(uint32_t shader, const char* src, uint32_t type)
 {
 	int compile_status;
 	const GLint src_len = (GLint)std::strlen(src);
