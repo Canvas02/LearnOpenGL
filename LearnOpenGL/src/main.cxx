@@ -106,24 +106,30 @@ int main()
 	// const auto y_frag_src = read_file("res/shaders/yellow.frag.glsl");
 	// const auto b_frag_src = read_file("res/shaders/blue.frag.glsl");
 
-    auto program = new ShaderProgram(vert_src.c_str(), frag_src.c_str());
-    program->use();
+	try { 
+		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
+		program.use();
 
-	while (!glfwWindowShouldClose(window))
-	{
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		while (!glfwWindowShouldClose(window))
+		{
+			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+			glBindVertexArray(vao);
+			glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		glfwPollEvents();
-		glfwSwapBuffers(window);
+			glfwPollEvents();
+			glfwSwapBuffers(window);
+		}
+
+		glDeleteBuffers(1, &vbo);
+		glDeleteVertexArrays(1, &vao);
 	}
-
-	glDeleteBuffers(1, &vbo);
-	glDeleteVertexArrays(1, &vao);
-    delete program;
+	catch (gl_error& ecx)
+	{
+		spdlog::error("Opengl: {}", ecx.what());
+		exit(EXIT_FAILURE);
+	}
 
 	glfwTerminate();
 	return 0;

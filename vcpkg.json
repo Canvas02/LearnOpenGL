@@ -1,10 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "learn-open-gl",
-  "version": "0.1.0-dev",
+  "version-string": "0.1.0-dev",
   "dependencies": [
     "glfw3",
     "spdlog",
-    "fmt"
+    "fmt",
+    {
+      "name": "glad",
+      "features": [ "gl-api-46" ]
+    }
   ]
 }

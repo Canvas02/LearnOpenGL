@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_subdirectory("LearnOpenGL")
 
-add_subdirectory("vendor/glad")
+# add_subdirectory("vendor/glad")
 # add_subdirectory("vendor/fmt")
 # add_subdirectory("vendor/glfw")
 # add_subdirectory("vendor/spdlog")

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <array>
 #include <unordered_map>
+#include <gl_error.h>
 
 auto make_shader(const char* src, uint32_t type) -> uint32_t;
 
