@@ -1,11 +1,13 @@
 #include "shader_program.h"
 
 #include <vector>
+#include <stdexcept>
 #include <glad/glad.h>
+#include <fmt/core.h>
 #include <spdlog/spdlog.h>
 #include "file.h"
+#include "gl_error.h"
 
-static int32_t make_shader(uint32_t shader, const char* src, uint32_t type);
 
 // ShaderProgram members return codes
 //  1: Successful
@@ -22,19 +24,21 @@ ShaderProgram::ShaderProgram(const char* vert_src, const char* frag_src)
 {
     m_id = glCreateProgram();
 
-    auto vert_shader = glCreateShader(GL_VERTEX_SHADER);
-    auto frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    uint32_t vert_shader;
+    uint32_t frag_shader;
 
-    if (!make_shader(vert_shader, vert_src, GL_VERTEX_SHADER))
-    {
-        spdlog::error("Error compiling vertex shader: {}", vert_shader);
-        exit(EXIT_FAILURE);
+    try {
+        vert_shader = make_shader(vert_src, GL_VERTEX_SHADER);
+    }
+    catch (gl_error& _exc){
+        throw gl_error(fmt::format("Error compiling vertex shader for program {}", m_id));
     }
 
-    if (!make_shader(frag_shader, frag_src, GL_FRAGMENT_SHADER))
-    {
-        spdlog::error("Error compiling fragment shader: {}", frag_shader);
-        exit(EXIT_FAILURE);
+    try {
+        frag_shader = make_shader(frag_src, GL_FRAGMENT_SHADER);
+    }
+    catch (gl_error& _exc){
+        throw gl_error(fmt::format("Error compiling fragment shader for program {}", m_id));
     }
 
     glAttachShader(m_id, vert_shader);
@@ -61,53 +65,19 @@ ShaderProgram::ShaderProgram(const char* vert_src, const char* frag_src)
 
         write_file("info.log", info_log_str.c_str());
 
-        spdlog::error("Error linking program {}", m_id);
-        exit(EXIT_FAILURE);
+        throw gl_error(fmt::format("Error linking program {}", m_id));
     }
 }
 
-void ShaderProgram::use() { glUseProgram(m_id); }
+void ShaderProgram::use() noexcept { glUseProgram(m_id); }
 
-int32_t ShaderProgram::setUniform(const char* name, bool value)
+// throw gl_error(fmt::format("Uniform {} not found", name));
+
+void ShaderProgram::setUniform(const char* name, std::array<float_t, 4> value)
 {
-    if(!m_uniforms.contains(name))
+    if(value.empty())
     {
-        auto uniform = glGetUniformLocation(m_id, name);
-        if (uniform == -1)
-        {
-            spdlog::error("Uniform {} not found", name);
-            return -1;
-        }
-        m_uniforms.insert({name, uniform});
-    }
-
-    glUniform1i(m_uniforms.at(name), (int)value);
-    return 1;
-}
-
-int32_t ShaderProgram::setUniform(const char* name, float_t value)
-{
-    if(!m_uniforms.contains(name))
-    {
-        auto uniform = glGetUniformLocation(m_id, name);
-        if (uniform == -1)
-        {
-            spdlog::error("Uniform {} not found", name);
-            return -1;
-        }
-        m_uniforms.insert({name, uniform});
-    }
-
-    glUniform1f(m_uniforms.at(name), value);
-    return 1;
-}
-
-int32_t ShaderProgram::setUniform(const char* name, std::vector<float_t> value)
-{
-    if (value.size() > 4)
-    {
-        spdlog::error("Max data size exceded, max size is 4");
-        return -2;
+        throw std::invalid_argument("Not enough elements in array");
     }
 
     if(!m_uniforms.contains(name))
@@ -115,8 +85,7 @@ int32_t ShaderProgram::setUniform(const char* name, std::vector<float_t> value)
         auto uniform = glGetUniformLocation(m_id, name);
         if (uniform == -1)
         {
-            spdlog::error("Uniform {} not found", name);
-            return -1;
+            throw gl_error(fmt::format("Uniform {} not found", name));
         }
         m_uniforms.insert({name, uniform});
     }
@@ -136,32 +105,13 @@ int32_t ShaderProgram::setUniform(const char* name, std::vector<float_t> value)
         glUniform4f(m_uniforms.at(name), value[0], value[1], value[2], value[3]);
         break;
     }
-    return 1;
 }
 
-int32_t ShaderProgram::setUniform(const char* name, int32_t value)
+void ShaderProgram::setUniform(const char* name, std::array<int32_t, 4> value)
 {
-    if(!m_uniforms.contains(name))
+    if(value.empty())
     {
-        auto uniform = glGetUniformLocation(m_id, name);
-        if (uniform == -1)
-        {
-            spdlog::error("Uniform {} not found", name);
-            return -1;
-        }
-        m_uniforms.insert({name, uniform});
-    }
-
-    glUniform1i(m_uniforms.at(name), value);
-    return 1;
-}
-
-int32_t ShaderProgram::setUniform(const char* name, std::vector<int32_t> value)
-{
-    if (value.size() > 4)
-    {
-        spdlog::error("Max data size exceded, max size is 4");
-        return -2;
+        throw std::invalid_argument("Not enough elements in array");
     }
 
     if(!m_uniforms.contains(name))
@@ -169,8 +119,7 @@ int32_t ShaderProgram::setUniform(const char* name, std::vector<int32_t> value)
         auto uniform = glGetUniformLocation(m_id, name);
         if (uniform == -1)
         {
-            spdlog::error("Uniform {} not found", name);
-            return -1;
+            throw gl_error(fmt::format("Uniform {} not found", name));
         }
         m_uniforms.insert({name, uniform});
     }
@@ -190,12 +139,13 @@ int32_t ShaderProgram::setUniform(const char* name, std::vector<int32_t> value)
         glUniform4i(m_uniforms.at(name), value[0], value[1], value[2], value[3]);
         break;
     }
-    return 1;
 }
 
-static int32_t make_shader(uint32_t shader, const char* src, uint32_t type)
+auto make_shader(const char* src, uint32_t type) -> uint32_t
 {
     int compile_status;
+
+    auto shader = glCreateShader(type);
 
     glShaderSource(shader, 1, &src, nullptr);
     glCompileShader(shader);
@@ -211,9 +161,8 @@ static int32_t make_shader(uint32_t shader, const char* src, uint32_t type)
         std::string info_log_str(info_log.begin(), info_log.end());
 
         write_file("info.log", info_log_str.c_str());
-
-        return 0;
+        throw gl_error("Failed to compile shader");
     }
 
-    return 1;
+    return shader;
 }

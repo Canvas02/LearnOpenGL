@@ -1,10 +1,6 @@
 
 cmake_minimum_required(VERSION 3.2)
-project(LearnOpenGL)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS OFF)
+project(LearnOpenGL LANGUAGES CXX)
 
 set(SRC_FILES
     "src/main.cxx"
@@ -18,6 +14,7 @@ set(HEADER_FILES
     "include/callbacks.h"
     "include/file.h"
     "include/shader_program.h"
+    "include/gl_error.h"
  )
 
  file(COPY "res" DESTINATION "${CMAKE_BINARY_DIR}/${PROJECT_NAME}")

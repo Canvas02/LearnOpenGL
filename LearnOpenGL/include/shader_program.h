@@ -2,9 +2,10 @@
 
 #include <cstdint>
 #include <cmath>
-#include <vector>
+#include <array>
 #include <unordered_map>
-//#include <optional>
+
+auto make_shader(const char* src, uint32_t type) -> uint32_t;
 
 class ShaderProgram
 {
@@ -13,13 +14,10 @@ private:
     std::unordered_map<const char*, uint32_t> m_uniforms = {};
 public:
     ShaderProgram(const char* vert_src, const char* frag_src);
-    ~ShaderProgram();
+    ~ShaderProgram() noexcept;
 
-    void use();
+    void use() noexcept;
 
-    int32_t setUniform(const char* name, bool value);
-    int32_t setUniform(const char* name, int32_t value);
-    int32_t setUniform(const char* name, float_t value);
-    int32_t setUniform(const char* name, std::vector<float_t> value);
-    int32_t setUniform(const char* name, std::vector<int32_t> value);
+    void setUniform(const char* name, std::array<float_t, 4> value);
+    void setUniform(const char* name, std::array<int32_t, 4> value);
 };
