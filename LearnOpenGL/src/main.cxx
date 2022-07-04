@@ -9,20 +9,21 @@
 #include "platfrom.h"
 #include "callbacks.h"
 #include "file.h"
-#include "shader_util.h"
+#include "shader_program.h"
 
 extern "C"
 {
 	DLL_EXPORT unsigned long NvOptimusEnablement = 0x00000001;
-	DLL_EXPORT int AmdPowerXpressRequestHighPerformance = 1;
+    DLL_EXPORT int AmdPowerXpressRequestHighPerformance = 1;
 }
 
 constexpr int32_t WIDTH = 800, HEIGHT = 600;
 
-constexpr std::array<float_t, 9> vertices{
-	0.5f, -0.5f, 0.0f,
-	-0.5f, -0.5f, 0.0f,
-	0.0f, 0.5f, 0.0f};
+constexpr std::array<float_t, 6 * 3> vertices{
+	0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+};
 
 /*
 constexpr std::array<unsigned int, 6> indices{
@@ -94,29 +95,24 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferStorage(GL_ARRAY_BUFFER, vertices.size() * sizeof(float_t), &vertices[0], 0);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 3, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 6, (void*)0);
 	glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 6, (void*)(sizeof(float) * 3));
+    glEnableVertexAttribArray(1);
 
 	const auto vert_src = read_file("res/shaders/basic.vert.glsl");
 	const auto frag_src = read_file("res/shaders/basic.frag.glsl");
 	// const auto y_frag_src = read_file("res/shaders/yellow.frag.glsl");
 	// const auto b_frag_src = read_file("res/shaders/blue.frag.glsl");
 
-	const auto program = make_program(vert_src.c_str(), frag_src.c_str());
-	glUseProgram(program);
-
-	const auto u_color = glGetUniformLocation(program, "u_color");
-	assert(u_color != -1);
+    auto program = new ShaderProgram(vert_src.c_str(), frag_src.c_str());
+    program->use();
 
 	while (!glfwWindowShouldClose(window))
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		auto time = glfwGetTime();
-		float_t green = (sin(time) / 2.0f) + 0.5f;
-		glUseProgram(program);
-		glUniform4f(u_color, 0.0f, green, 0.0f, 1.0f);
 
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -127,7 +123,7 @@ int main()
 
 	glDeleteBuffers(1, &vbo);
 	glDeleteVertexArrays(1, &vao);
-	glDeleteProgram(program);
+    delete program;
 
 	glfwTerminate();
 	return 0;
