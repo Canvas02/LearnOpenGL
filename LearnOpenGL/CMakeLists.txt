@@ -17,12 +17,16 @@ set(HEADER_FILES
     "include/gl_error.h"
  )
 
- file(COPY "res" DESTINATION "${CMAKE_BINARY_DIR}/${PROJECT_NAME}")
+file(COPY "res" DESTINATION "${CMAKE_BINARY_DIR}/${PROJECT_NAME}")
+
+find_package(fmt CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
-target_link_libraries(${PROJECT_NAME} glad glfw spdlog fmt::fmt)
+target_link_libraries(${PROJECT_NAME} glad glfw spdlog::spdlog fmt::fmt)
 
 if(WIN32)
 target_compile_definitions(${PROJECT_NAME} PRIVATE "WINDOWS")
