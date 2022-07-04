@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <cmath>
-#include <array>
+#include <vector>
 #include <unordered_map>
 #include <gl_error.h>
 
@@ -19,6 +19,6 @@ public:
 
     void use() noexcept;
 
-    void setUniform(const char* name, std::array<float_t, 4> value);
-    void setUniform(const char* name, std::array<int32_t, 4> value);
+    void setUniform(const char* name, std::vector<float_t> value);
+    void setUniform(const char* name, std::vector<int32_t> value);
 };

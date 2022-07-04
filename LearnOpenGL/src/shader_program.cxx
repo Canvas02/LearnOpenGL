@@ -73,11 +73,15 @@ void ShaderProgram::use() noexcept { glUseProgram(m_id); }
 
 // throw gl_error(fmt::format("Uniform {} not found", name));
 
-void ShaderProgram::setUniform(const char* name, std::array<float_t, 4> value)
+void ShaderProgram::setUniform(const char* name, std::vector<float_t> value)
 {
     if(value.empty())
     {
-        throw std::invalid_argument("Not enough elements in array");
+        throw std::invalid_argument("Not enough elements in vertex");
+    }
+    else if (value.size() > 4)
+    {
+        throw std::invalid_argument("too many elements, max is 4");
     }
 
     if(!m_uniforms.contains(name))
@@ -107,11 +111,15 @@ void ShaderProgram::setUniform(const char* name, std::array<float_t, 4> value)
     }
 }
 
-void ShaderProgram::setUniform(const char* name, std::array<int32_t, 4> value)
+void ShaderProgram::setUniform(const char* name, std::vector<int32_t> value)
 {
     if(value.empty())
     {
-        throw std::invalid_argument("Not enough elements in array");
+        throw std::invalid_argument("Not enough elements in vector");
+    }
+    else if(value.size() > 4)
+    {
+        throw std::invalid_argument("too many elements, max is 4");
     }
 
     if(!m_uniforms.contains(name))

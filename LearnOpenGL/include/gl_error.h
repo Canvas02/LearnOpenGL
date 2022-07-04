@@ -8,8 +8,8 @@ class gl_error : public std::exception
 public:
     explicit gl_error(const char* message)
         : msg_(message) {}
-    explicit gl_error(std::string& message)
-        : msg_(message) {}
+    //explicit gl_error(std::string& message)
+    //    : msg_(message) {}
     explicit gl_error(std::string message)
         : msg_(message) {}
 

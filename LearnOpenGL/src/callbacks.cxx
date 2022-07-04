@@ -128,7 +128,6 @@ void debug_msg_callback(
 	{
 	case GL_DEBUG_SEVERITY_HIGH:
 		spdlog::error(msg);
-		assert(false);
 		break;
 	case GL_DEBUG_SEVERITY_MEDIUM:
 		spdlog::warn(msg);
