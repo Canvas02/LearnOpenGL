@@ -110,19 +110,10 @@ int main()
 		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
 		program.use();
 
-		std::vector<float_t> offset{ 1 };
-
 		while (!glfwWindowShouldClose(window))
 		{
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
-			
-			program.setUniform("offset", offset);
-			if (offset[0] > -1)
-				offset[0] -= 0.08f;
-			else
-				offset[0] = 1;
-
 
 			glBindVertexArray(vao);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
