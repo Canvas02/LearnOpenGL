@@ -89,44 +89,6 @@ int main()
 		puts("Debug output disabled\n\n");
 	}
 
-
-	// Load image
-	int32_t wood_width, wood_height, wood_nrChannels;
-	auto wood_img = stbi_load("res/textures/wood_container.png", &wood_width, &wood_height, &wood_nrChannels, 0);
-	if (!wood_img)
-	{
-		spdlog::error("Failed to load image");
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-
-	int32_t face_width, face_height, face_nrChannels;
-	auto face_img = stbi_load("res/textures/awesomeface.png", &face_width, &face_height, &face_nrChannels, 0);
-	if (!face_img)
-	{
-		spdlog::error("Failed to load image");
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
-
-	//glGenTextures(1, &texture0);
-	//glGenTextures(1, &texture1);
-
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, texture0);
-
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wood_width, wood_height, 0, GL_RGB, GL_UNSIGNED_BYTE, wood_img);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, texture1);
-
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, face_width, face_height, 0, GL_RGB, GL_UNSIGNED_BYTE, face_img);
-	//glGenerateMipmap(GL_TEXTURE_2D);
-
-	stbi_image_free(wood_img);
-	stbi_image_free(face_img);
-
 	uint32_t vbo, vao, ibo;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
