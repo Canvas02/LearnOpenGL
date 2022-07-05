@@ -30,8 +30,8 @@ constexpr std::array<float_t, 8 * 4> vertices{
 };
 
 constexpr std::array<uint32_t, 6> indices{
-	0, 1, 2,
-	0, 3, 2
+	0, 1, 3,
+	1, 2, 3
 };
 
 int main()
@@ -89,33 +89,43 @@ int main()
 		puts("Debug output disabled\n\n");
 	}
 
-	// Texture options
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Load image
-	int32_t width, height, nrChannels;
-	auto data = stbi_load("res/textures/wood_container.jpg", &width, &height, &nrChannels, 0);
-	if (!data)
+	int32_t wood_width, wood_height, wood_nrChannels;
+	auto wood_img = stbi_load("res/textures/wood_container.png", &wood_width, &wood_height, &wood_nrChannels, 0);
+	if (!wood_img)
 	{
 		spdlog::error("Failed to load image");
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
 
-	uint32_t texture;
-	glGenTextures(1, &texture);
+	int32_t face_width, face_height, face_nrChannels;
+	auto face_img = stbi_load("res/textures/awesomeface.png", &face_width, &face_height, &face_nrChannels, 0);
+	if (!face_img)
+	{
+		spdlog::error("Failed to load image");
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
+
+	//glGenTextures(1, &texture0);
+	//glGenTextures(1, &texture1);
 
 	//glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	//glBindTexture(GL_TEXTURE_2D, texture0);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wood_width, wood_height, 0, GL_RGB, GL_UNSIGNED_BYTE, wood_img);
+	//glGenerateMipmap(GL_TEXTURE_2D);
 
-	stbi_image_free(data);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, texture1);
+
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, face_width, face_height, 0, GL_RGB, GL_UNSIGNED_BYTE, face_img);
+	//glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(wood_img);
+	stbi_image_free(face_img);
 
 	uint32_t vbo, vao, ibo;
 	glGenVertexArrays(1, &vao);
@@ -137,6 +147,62 @@ int main()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float_t) * 8, (void*)(sizeof(float) * 6));
     glEnableVertexAttribArray(2);
 
+	uint32_t texture0, texture1;
+	int32_t width, height, nrChannels;
+	uint8_t* data;
+
+	// texture0
+	glGenTextures(1, &texture0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture0);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_set_flip_vertically_on_load(true);
+
+	data = stbi_load("res/textures/wood_container.jpg", &width, &height, &nrChannels, 0);
+	if (!data)
+	{
+		spdlog::error("Failed to load image");
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
+	// texture1
+	glGenTextures(1, &texture1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture1);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	data = stbi_load("res/textures/awesomeface.png", &width, &height, &nrChannels, 0);
+	if (!data)
+	{
+		spdlog::error("Failed to load image");
+		glfwTerminate();
+		exit(EXIT_FAILURE);
+	}
+	else
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	stbi_image_free(data);
+
 	const auto vert_src = read_file("res/shaders/basic.vert.glsl");
 	const auto frag_src = read_file("res/shaders/basic.frag.glsl");
 	// const auto y_frag_src = read_file("res/shaders/yellow.frag.glsl");
@@ -151,7 +217,12 @@ int main()
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			glBindTexture(GL_TEXTURE_2D, texture);
+			
+			//glActiveTexture(GL_TEXTURE0);
+			//glBindTexture(GL_TEXTURE_2D, texture0);
+			//glActiveTexture(GL_TEXTURE1);
+			//glBindTexture(GL_TEXTURE_2D, texture1);
+
 			glBindVertexArray(vao);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
@@ -160,6 +231,11 @@ int main()
 		}
 
 		glDeleteBuffers(1, &vbo);
+		glDeleteBuffers(1, &ibo);
+
+		glDeleteTextures(1, &texture0);
+		glDeleteTextures(1, &texture1);
+
 		glDeleteVertexArrays(1, &vao);
 	}
 	catch (gl_error& ecx)

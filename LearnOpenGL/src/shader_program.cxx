@@ -30,14 +30,14 @@ ShaderProgram::ShaderProgram(const char* vert_src, const char* frag_src)
     try {
         vert_shader = make_shader(vert_src, GL_VERTEX_SHADER);
     }
-    catch (gl_error& _exc){
+    catch (gl_error&){
         throw gl_error(fmt::format("Error compiling vertex shader for program {}", m_id));
     }
 
     try {
         frag_shader = make_shader(frag_src, GL_FRAGMENT_SHADER);
     }
-    catch (gl_error& _exc){
+    catch (gl_error&){
         throw gl_error(fmt::format("Error compiling fragment shader for program {}", m_id));
     }
 

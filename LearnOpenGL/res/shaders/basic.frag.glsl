@@ -5,9 +5,10 @@ in vec2 fTexCoord;
 
 out vec4 color;
 
-uniform sampler2D oTexture1;
+layout (binding = 0) uniform sampler2D uTexture0;
+layout (binding = 1) uniform sampler2D uTexture1;
 
 void main()
 {
-	color = texture(oTexture1, fTexCoord) * vec4(fColor, 1.0);
+	color = mix(texture(uTexture0, fTexCoord), texture(uTexture1, fTexCoord), 0.2);
 }
