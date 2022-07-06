@@ -23,10 +23,10 @@ constexpr int32_t WIDTH = 800, HEIGHT = 600;
 
 constexpr std::array<float_t, 8 * 4> vertices{
 //	 [0] aPos				[1] aColor			[2] aTexCoord
-	 0.5f,  0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	0.55f, 0.55f,
-	 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	0.55f, 0.45f,
-	-0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	0.45f, 0.45f,
-	-0.5f,  0.5f, 0.0f,		1.0f, 1.0f, 0.0f,	0.45f, 0.55f
+	 0.5f,  0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f,
+	 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f,
+	-0.5f,  0.5f, 0.0f,		1.0f, 1.0f, 0.0f,	0.0f, 1.0f
 };
 
 constexpr std::array<uint32_t, 6> indices{
@@ -121,8 +121,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -174,16 +174,30 @@ int main()
 		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
 		program.use();
 
+		std::vector<float_t> uTextureMix{ 0.2 };
+
 		while (!glfwWindowShouldClose(window))
 		{
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			
-			//glActiveTexture(GL_TEXTURE0);
-			//glBindTexture(GL_TEXTURE_2D, texture0);
-			//glActiveTexture(GL_TEXTURE1);
-			//glBindTexture(GL_TEXTURE_2D, texture1);
+			if (glfwGetKey(window, GLFW_KEY_UP))
+			{
+				if (uTextureMix[0] < 1)
+					uTextureMix[0] += 0.01;
+			}
+			else if (glfwGetKey(window, GLFW_KEY_DOWN))
+			{
+				if (uTextureMix[0] > 0)
+					uTextureMix[0] -= 0.01;
+			}
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture0);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, texture1);
+
+			program.setUniform("uTextureMix", uTextureMix);
 
 			glBindVertexArray(vao);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

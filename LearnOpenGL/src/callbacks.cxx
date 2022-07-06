@@ -9,8 +9,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (action == GLFW_PRESS)
     spdlog::info("GLFW key press = {}", key);
-    if (key == GLFW_KEY_ESCAPE)
+	if (key == GLFW_KEY_ESCAPE)
+	{
         glfwSetWindowShouldClose(window, true);
+	}
 	else if (key == GLFW_KEY_W)
 	{
 		if (draw_filled)
