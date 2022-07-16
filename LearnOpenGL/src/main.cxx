@@ -7,6 +7,9 @@
 #include <fmt/core.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "platfrom.h"
 #include "callbacks.h"
@@ -167,14 +170,21 @@ int main()
 
 	const auto vert_src = read_file("res/shaders/basic.vert.glsl");
 	const auto frag_src = read_file("res/shaders/basic.frag.glsl");
-	// const auto y_frag_src = read_file("res/shaders/yellow.frag.glsl");
-	// const auto b_frag_src = read_file("res/shaders/blue.frag.glsl");
+
+	glm::mat4 trans = glm::mat4(1.0f);
+	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
 
 	try { 
 		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
 		program.use();
 
+
 		std::vector<float_t> uTextureMix{ 0.2 };
+
+
+
+		unsigned int transformLoc = glGetUniformLocation(program.id, "transform");
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -197,7 +207,13 @@ int main()
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, texture1);
 
+			glm::mat4 trans = glm::mat4(1.0f);
+			trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+			trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
 			program.setUniform("uTextureMix", uTextureMix);
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
 
 			glBindVertexArray(vao);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

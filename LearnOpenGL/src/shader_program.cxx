@@ -18,11 +18,11 @@
 // -11: Error compiling shader
 // -12: Error linking program
 
-ShaderProgram::~ShaderProgram() { glDeleteProgram(m_id); }
+ShaderProgram::~ShaderProgram() { glDeleteProgram(id); }
 
 ShaderProgram::ShaderProgram(const char* vert_src, const char* frag_src)
 {
-    m_id = glCreateProgram();
+    id = glCreateProgram();
 
     uint32_t vert_shader;
     uint32_t frag_shader;
@@ -31,45 +31,45 @@ ShaderProgram::ShaderProgram(const char* vert_src, const char* frag_src)
         vert_shader = make_shader(vert_src, GL_VERTEX_SHADER);
     }
     catch (gl_error&){
-        throw gl_error(fmt::format("Error compiling vertex shader for program {}", m_id));
+        throw gl_error(fmt::format("Error compiling vertex shader for program {}", id));
     }
 
     try {
         frag_shader = make_shader(frag_src, GL_FRAGMENT_SHADER);
     }
     catch (gl_error&){
-        throw gl_error(fmt::format("Error compiling fragment shader for program {}", m_id));
+        throw gl_error(fmt::format("Error compiling fragment shader for program {}", id));
     }
 
-    glAttachShader(m_id, vert_shader);
-    glAttachShader(m_id, frag_shader);
-    glLinkProgram(m_id);
+    glAttachShader(id, vert_shader);
+    glAttachShader(id, frag_shader);
+    glLinkProgram(id);
 
-    glDetachShader(m_id, vert_shader);
-    glDetachShader(m_id, frag_shader);
+    glDetachShader(id, vert_shader);
+    glDetachShader(id, frag_shader);
 
     glDeleteShader(vert_shader);
     glDeleteShader(frag_shader);
 
     int link_status;
-    glGetProgramiv(m_id, GL_LINK_STATUS, &link_status);
+    glGetProgramiv(id, GL_LINK_STATUS, &link_status);
     if (link_status == GL_FALSE)
     {
         int info_log_len;
-        glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &info_log_len);
+        glGetProgramiv(id, GL_INFO_LOG_LENGTH, &info_log_len);
 
         std::vector<char> info_log(info_log_len);
-        glGetProgramInfoLog(m_id, info_log_len, &info_log_len, &info_log[0]);
+        glGetProgramInfoLog(id, info_log_len, &info_log_len, &info_log[0]);
 
         std::string info_log_str(info_log.begin(), info_log.end());
 
         write_file("info.log", info_log_str.c_str());
 
-        throw gl_error(fmt::format("Error linking program {}", m_id));
+        throw gl_error(fmt::format("Error linking program {}", id));
     }
 }
 
-void ShaderProgram::use() noexcept { glUseProgram(m_id); }
+void ShaderProgram::use() noexcept { glUseProgram(id); }
 
 // throw gl_error(fmt::format("Uniform {} not found", name));
 
@@ -86,7 +86,7 @@ void ShaderProgram::setUniform(const char* name, std::vector<float_t> value)
 
     if(!m_uniforms.contains(name))
     {
-        auto uniform = glGetUniformLocation(m_id, name);
+        auto uniform = glGetUniformLocation(id, name);
         if (uniform == -1)
         {
             throw gl_error(fmt::format("Uniform {} not found", name));
@@ -124,7 +124,7 @@ void ShaderProgram::setUniform(const char* name, std::vector<int32_t> value)
 
     if(!m_uniforms.contains(name))
     {
-        auto uniform = glGetUniformLocation(m_id, name);
+        auto uniform = glGetUniformLocation(id, name);
         if (uniform == -1)
         {
             throw gl_error(fmt::format("Uniform {} not found", name));

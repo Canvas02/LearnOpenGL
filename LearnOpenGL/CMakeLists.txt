@@ -20,7 +20,7 @@ set(HEADER_FILES
 find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
+find_path(STB_INCLUDE_DIRS "stb_c_lexer.h")
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${HEADER_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
@@ -30,14 +30,27 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 	spdlog::spdlog 
 	fmt::fmt
 	glfw 
+    stb
+    glm
 )
 
-file(COPY "res" DESTINATION "${CMAKE_BINARY_DIR}/${PROJECT_NAME}")
+set(RESOURCE_FILES
+    "res/shaders/basic.frag.glsl"
+    "res/shaders/basic.vert.glsl"
+
+    "res/textures/awesomeface.png"
+    "res/textures/wood_container.jpg"
+)
+
+foreach(f IN LISTS RESOURCE_FILES)
+    configure_file(${f} ${f} COPYONLY)
+endforeach()
+
 # add_custom_command(
 #     TARGET ${PROJECT_NAME} PRE_BUILD
 #     COMMAND ${CMAKE_COMMAND} -E copy_directory
-#         "${CMAKE_SOURCE_DIR}/res"
-#         "${CMAKE_BINARY_DIR}/res"
+#         "${CMAKE_SOURCE_DIR}/LearnOpenGL/res"
+#         "${CMAKE_BINARY_DIR}/LearnOpenGL/res"
 # )
 
 if(WIN32)

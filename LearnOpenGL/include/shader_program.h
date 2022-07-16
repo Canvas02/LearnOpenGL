@@ -11,9 +11,10 @@ auto make_shader(const char* src, uint32_t type) -> uint32_t;
 class ShaderProgram
 {
 private:
-    uint32_t m_id;
     std::unordered_map<const char*, uint32_t> m_uniforms = {};
 public:
+    uint32_t id;
+
     ShaderProgram(const char* vert_src, const char* frag_src);
     ~ShaderProgram() noexcept;
 
