@@ -176,14 +176,12 @@ int main()
 	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
 
 	try { 
-		ShaderProgram program0(vert_src.c_str(), frag_src.c_str());
-		ShaderProgram program1(vert_src.c_str(), frag_src.c_str());
+		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
 
-		program0.use();
+		program.use();
 
-		uint32_t transformLoc0 = glGetUniformLocation(program0.id, "transform");
-		uint32_t transformLoc1 = glGetUniformLocation(program1.id, "transform");
-		assert(transformLoc0 != -1);
+		uint32_t transformLoc = glGetUniformLocation(program.id, "transform");
+		assert(transformLoc != -1);
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -195,29 +193,22 @@ int main()
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, texture1);
 
-			program0.use();
-
 			glm::mat4 trans = glm::mat4(1.0f);
 			trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
 			trans = glm::rotate(trans, abs(sin((float)glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 
-			glUniformMatrix4fv(transformLoc0, 1, GL_FALSE, glm::value_ptr(trans));
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-			program1.use();
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 			trans = glm::mat4(1.0f);
 			trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
 			trans = glm::rotate(trans, abs(sin((float)glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
 
-			glUniformMatrix4fv(transformLoc1, 1, GL_FALSE, glm::value_ptr(trans));
+			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-			glBindVertexArray(vao);
-
-			program0.use();
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-			program1.use();
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 			glfwPollEvents();
 			glfwSwapBuffers(window);
