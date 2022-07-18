@@ -175,13 +175,30 @@ int main()
 	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
 	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
 
+	auto model = glm::mat4(1.0f);
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	auto view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	auto proj = glm::mat4(1.0f);
+	proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
 	try { 
 		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
 
 		program.use();
 
-		uint32_t transformLoc = glGetUniformLocation(program.id, "transform");
-		assert(transformLoc != -1);
+		auto uModel = glGetUniformLocation(program.id, "model");
+		assert(uModel != -1);
+		auto uView = glGetUniformLocation(program.id, "view");
+		assert(uView != -1);
+		auto uProj = glGetUniformLocation(program.id, "proj");
+		assert(uProj != -1);
+
+		glUniformMatrix4fv(uModel, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(uView, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(uProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -193,22 +210,7 @@ int main()
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, texture1);
 
-			glm::mat4 trans = glm::mat4(1.0f);
-			trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-			trans = glm::rotate(trans, abs(sin((float)glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-			trans = glm::mat4(1.0f);
-			trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
-			trans = glm::rotate(trans, abs(sin((float)glfwGetTime())), glm::vec3(0.0f, 0.0f, 1.0f));
-
-			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
 
 			glfwPollEvents();
 			glfwSwapBuffers(window);
