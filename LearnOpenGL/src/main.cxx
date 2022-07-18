@@ -1,6 +1,7 @@
 #include <array>
 #include <cstdint>
 #include <cassert>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <spdlog/spdlog.h>
@@ -24,18 +25,62 @@ extern "C"
 
 constexpr int32_t WIDTH = 800, HEIGHT = 600;
 
-constexpr std::array<float_t, 8 * 4> vertices{
-//	 [0] aPos				[1] aColor			[2] aTexCoord
-	 0.5f,  0.5f, 0.0f,		1.0f, 0.0f, 0.0f,	1.0f, 1.0f,
-	 0.5f, -0.5f, 0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
-	-0.5f, -0.5f, 0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f,
-	-0.5f,  0.5f, 0.0f,		1.0f, 1.0f, 0.0f,	0.0f, 1.0f
+constexpr float_t vertices[] {
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
-constexpr std::array<uint32_t, 6> indices{
-	0, 1, 3,
-	1, 2, 3
-};
+constexpr glm::vec3 cubePositions[]{
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
 
 int main()
 {
@@ -70,6 +115,8 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
+	glEnable(GL_DEPTH_TEST);
+
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -92,25 +139,22 @@ int main()
 		puts("Debug output disabled\n\n");
 	}
 
-	uint32_t vbo, vao, ibo;
+	uint32_t vbo, vao;
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ibo);
 
 	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferStorage(GL_ARRAY_BUFFER, vertices.size() * sizeof(float_t), &vertices[0], 0);
-	glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), &indices[0], 0);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 8, (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferStorage(GL_ARRAY_BUFFER, sizeof(vertices), vertices, 0);
+
+	// Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 5, (void*)0);
 	glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float_t) * 8, (void*)(sizeof(float) * 3));
+	// Texure coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float_t) * 5, (void*)(sizeof(float_t) * 3));
     glEnableVertexAttribArray(1);
-
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float_t) * 8, (void*)(sizeof(float) * 6));
-    glEnableVertexAttribArray(2);
 
 	uint32_t texture0, texture1;
 	int32_t width, height, nrChannels;
@@ -118,11 +162,11 @@ int main()
 
 	// texture0
 	glGenTextures(1, &texture0);
-	glActiveTexture(GL_TEXTURE0);
+	//glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture0);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -145,14 +189,14 @@ int main()
 
 	// texture1
 	glGenTextures(1, &texture1);
-	glActiveTexture(GL_TEXTURE1);
+	//glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, texture1);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	data = stbi_load("res/textures/awesomeface.png", &width, &height, &nrChannels, 0);
 	if (!data)
@@ -163,7 +207,7 @@ int main()
 	}
 	else
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	stbi_image_free(data);
@@ -171,18 +215,6 @@ int main()
 	const auto vert_src = read_file("res/shaders/basic.vert.glsl");
 	const auto frag_src = read_file("res/shaders/basic.frag.glsl");
 
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));  
-
-	auto model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-	auto view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-	auto proj = glm::mat4(1.0f);
-	proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	try { 
 		ShaderProgram program(vert_src.c_str(), frag_src.c_str());
@@ -196,28 +228,40 @@ int main()
 		auto uProj = glGetUniformLocation(program.id, "proj");
 		assert(uProj != -1);
 
-		glUniformMatrix4fv(uModel, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(uView, 1, GL_FALSE, glm::value_ptr(view));
+		auto model = glm::mat4(1.0f);
+		auto view = glm::mat4(1.0f);
+		auto proj = glm::mat4(1.0f);
+
+		proj = glm::perspective(glm::radians(45.0f), (float_t)WIDTH / (float_t)HEIGHT, 0.1f, 100.0f);
+
 		glUniformMatrix4fv(uProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 		while (!glfwWindowShouldClose(window))
 		{
 			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, texture0);
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, texture1);
+			
+			view = glm::mat4(1.0f);
+			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			model = glm::mat4(1.0f);
+			model = glm::rotate(model, glm::radians(50.0f) * (float_t)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+
+			glUniformMatrix4fv(uView, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(uModel, 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, 36);
 
 			glfwPollEvents();
 			glfwSwapBuffers(window);
 		}
 
 		glDeleteBuffers(1, &vbo);
-		glDeleteBuffers(1, &ibo);
 
 		glDeleteTextures(1, &texture0);
 		glDeleteTextures(1, &texture1);

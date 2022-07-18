@@ -18,7 +18,7 @@
 // -11: Error compiling shader
 // -12: Error linking program
 
-ShaderProgram::~ShaderProgram() { glDeleteProgram(id); }
+ShaderProgram::~ShaderProgram() noexcept { glDeleteProgram(id); }
 
 ShaderProgram::ShaderProgram(const char* vert_src, const char* frag_src)
 {
