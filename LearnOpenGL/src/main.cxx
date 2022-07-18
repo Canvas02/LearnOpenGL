@@ -246,8 +246,8 @@ int main()
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, texture1);
 			
-			view = glm::mat4(1.0f);
-			view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+			// view = glm::mat4(1.0f);
+			// view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 			model = glm::mat4(1.0f);
 			model = glm::rotate(model, glm::radians(50.0f) * (float_t)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
@@ -256,6 +256,12 @@ int main()
 			glUniformMatrix4fv(uModel, 1, GL_FALSE, glm::value_ptr(model));
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			// glBindVertexArray(vao);
+			// for (uint32_t i = 0; i < 10; i++)
+			// {
+			// 	model = glm::mat4(1.0f);
+			// }
 
 			glfwPollEvents();
 			glfwSwapBuffers(window);
