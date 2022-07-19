@@ -229,14 +229,21 @@ int main()
 		assert(uProj != -1);
 
 		auto model = glm::mat4(1.0f);
-		auto view = glm::mat4(1.0f);
 		auto proj = glm::mat4(1.0f);
+		auto view = glm::lookAt(
+			glm::vec3(0.0f, 0.0f, 3.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		);
 
 		proj = glm::perspective(glm::radians(45.0f), (float_t)WIDTH / (float_t)HEIGHT, 0.1f, 100.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 		glUniformMatrix4fv(uProj, 1, GL_FALSE, glm::value_ptr(proj));
 		glUniformMatrix4fv(uView, 1, GL_FALSE, glm::value_ptr(view));
+
+		const float_t radius = 10.0f;
+		float_t camX;
+		float_t camZ;
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -258,14 +265,21 @@ int main()
 				model = glm::mat4(1.0f);
 				model = glm::translate(model, cubePositions[i]);
 				float_t angle = 20.0f * i;
-				if (i % 3 == 0)
-					angle = (float_t)glfwGetTime() * 25.0f;
-
 				model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 				glUniformMatrix4fv(uModel, 1, GL_FALSE, glm::value_ptr(model));
 
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
+
+			camX = sin(glfwGetTime()) * radius;
+			camZ = cos(glfwGetTime()) * radius;
+			view = glm::lookAt(
+				glm::vec3(camX, 0.0, camZ),
+				glm::vec3(0.0),
+				glm::vec3(0.0, 1.0, 0.0)
+			);
+
+			glUniformMatrix4fv(uView, 1, GL_FALSE, glm::value_ptr(view));
 
 			glfwPollEvents();
 			glfwSwapBuffers(window);
